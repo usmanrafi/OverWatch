@@ -3,6 +3,22 @@ import urllib.request
 import re
 import json
 
+def printAllMovies(days, movies_showing, movie_ids, movie_titles, movie_director, movie_duration, movie_actors, movie_times):
+	offset = 0
+	for i in range(0,len(movies_showing)):
+		print(days[i] + "> \n")
+		for j in range(0, movies_showing[i]):
+			print("\tTitle> \t\t" + movie_titles[offset])
+			print("\tDirector> \t" + movie_director[offset])
+			print("\tDuration> \t" + movie_duration[offset])
+			print("\tActors> \t" + movie_actors[offset])
+			print("\tTimes> \n") 
+			print(movie_times[offset])
+
+			print("\n\n")
+			offset += 1
+
+
 def cleanData(data):
 	data = data[8]
 	data = str(data)
@@ -112,11 +128,12 @@ while(data.find("2018") != -1):
 	index = data.find("2018")
 
 
-print(days)
-print(movies_showing)
-print(movie_ids)
-print(movie_titles)
-print(movie_duration)
-print(movie_director)
-print(movie_actors)
-print(movie_times)
+printAllMovies(days, movies_showing, movie_ids, movie_titles, movie_director, movie_duration, movie_actors, movie_times)
+# print(days)
+# print(movies_showing)
+# print(movie_ids)
+# print(movie_titles)
+# print(movie_duration)
+# print(movie_director)
+# print(movie_actors)
+# print(movie_times)
