@@ -113,7 +113,7 @@ while(data.find("2018") != -1):
 			data = data[data.find("\""):]
 
 			category = data.find("shortName")
-			if(category != -1 and category < data.find("url")):
+			if(category != -1 and category < data.find("time") and category < data.find("url")):
 				times.append(data[category+12:data.find("\"", category+12)].strip())
 			offset = data.find("time")
 
