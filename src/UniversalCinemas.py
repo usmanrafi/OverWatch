@@ -3,50 +3,120 @@ import urllib.request
 import re
 import json
 
+def cleanData(data):
+	data = data[8]
+	data = str(data)
+
+	data = data[data.index("{"):]
+	data = data[:data.index("movieDataByReleaseDate")]
+
+	commaIndex = data[:data.rfind("'2018-")].rfind(",")
+	bar = data[:commaIndex]
+	while(commaIndex != -1):
+		data = data[:commaIndex] + data[commaIndex+1:]
+		commaIndex = bar.rfind(",")
+		data = data[:commaIndex] + data[commaIndex+1:]
+		commaIndex = bar[:bar.rfind("'2018-")].rfind(",")
+		bar = data[:commaIndex]
+
+
+	for i in range(0,3):
+		data = data[:data.rindex(",")] + data[data.rindex(",")+1:]
+
+	while(data.find("/*will have to change nowPlaying to have separate dates everywhere */") != -1):
+		data = data.replace("/*will have to change nowPlaying to have separate dates everywhere */", "")
+
+	while(data.find("'") != -1):
+		data = data.replace("'", "\"")
+
+	jd = json.dumps(data)
+	jl = json.loads(jd)	
+
+	return data
+
+
+
+# main
 src = urllib.request.urlopen('https://universalcinemas.com/').read()
 soup = bs.BeautifulSoup(src, "lxml")
+data = soup.find_all('script')
 
-foo = soup.find_all('script')
-foo = foo[8]
-foo = str(foo)
+data = cleanData(data)
 
-foo = foo[foo.index("{"):]
-foo = foo[:foo.index("movieDataByReleaseDate")]
+days = []
+movies_showing = []
 
-commaIndex = foo[:foo.rfind("'2018-")].rfind(",")
-bar = foo[:commaIndex]
-while(commaIndex != -1):
-	foo = foo[:commaIndex] + foo[commaIndex+1:]
-	commaIndex = bar.rfind(",")
-	foo = foo[:commaIndex] + foo[commaIndex+1:]
-	commaIndex = bar[:bar.rfind("'2018-")].rfind(",")
-	bar = foo[:commaIndex]
+movie_ids = []
+movie_titles = []
+movie_actors = []
+movie_director = []
+movie_duration = []
+movie_times = []
 
 
-for i in range(0,3):
-	foo = foo[:foo.rindex(",")] + foo[foo.rindex(",")+1:]
+index = data.find("2018")
 
-while(foo.find("/*will have to change nowPlaying to have separate dates everywhere */") != -1):
-	foo = foo.replace("/*will have to change nowPlaying to have separate dates everywhere */", "")
+while(data.find("2018") != -1):
+
+	days.append(data[index:index+10].strip())
+
+	data = data[index+10:]
+
+	movie_count = 0					# movies showing in a particular day
+
+	offset = data.find("url")
+	while(offset != -1 and offset < data.find("2018")):
+
+		movie_ids.append(data[offset+7:data.find("\"", offset+7)].strip())
+
+		offset = data.find("title")
+		data = data[offset:]
+		movie_titles.append(data[9: data.find("\"", 9)].strip())
+
+		offset = data.find("duration")
+		data = data[offset:]
+		movie_duration.append(data[12: data.find("\"", 12)].strip())
+
+		offset = data.find("director")
+		data = data[offset:]
+		movie_director.append(data[12: data.find("\"", 12)].strip())
+
+		offset = data.find("actors")
+		data = data[offset:]
+		movie_actors.append(data[10: data.find("\"", 10)].strip())
+
+		times = []
+		offset = data.find("times")
+		data = data[offset:]
+
+		offset = data.find("time\":")
+		while(offset != -1 and offset < data.find("url")):
+
+			data = data[offset+8:]
+			times.append(data[: data.find("\"")].strip())
+			data = data[data.find("\""):]
+
+			category = data.find("shortName")
+			if(category != -1 and category < data.find("url")):
+				times.append(data[category+12:data.find("\"", category+12)].strip())
+			offset = data.find("time")
 
 
-jd = json.dumps(foo)
-jl = json.loads(jd)
-print (jl)
+		movie_times.append(times)
+		movie_count += 1
+
+		offset = data.find("url")
 
 
-#print(re.split(r"movieData = ",foo.text))
-
-# movies = soup.find("div", {"id": "moviePreviews"})
-
-# movie_names = movies.find_all('h2')
-# movie_ids = []
-
-# id_list = movies.find_all('a')
-
-# for i in range(0, len(id_list) - 2, 2):		# to get rid of extra links
-# 	movie_ids.append(id_list[i].get('href'))
+	movies_showing.append(movie_count)
+	index = data.find("2018")
 
 
-
-
+print(days)
+print(movies_showing)
+print(movie_ids)
+print(movie_titles)
+print(movie_duration)
+print(movie_director)
+print(movie_actors)
+print(movie_times)
