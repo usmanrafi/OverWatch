@@ -116,6 +116,64 @@ def parseMovies():
 		index = data.find("2018")
 
 
+def getMoviesByCategory(cat):
+
+	if(cat < 0 or cat > 3):
+		print("Incorrect category entered!")
+
+	if(cat == 3):
+		printAllMovies()
+	else:
+
+		global data, days, movies_showing, movie_ids, movie_titles, movie_actors
+		global movie_director, movie_duration, movie_times
+
+		offset = 0
+		for i in range(0,len(movies_showing)):
+			print(days[i] + "> \n")
+			for j in range(0, movies_showing[i]):
+				print("\tTitle> \t\t" + movie_titles[offset])
+				print("\tDirector> \t" + movie_director[offset])
+				print("\tDuration> \t" + movie_duration[offset])
+				print("\tActors> \t" + movie_actors[offset])
+		
+				time = movie_times[offset]
+				if(cat == 2):
+					print("\tTimes (Ultra) > \n") 
+					k = 0;
+					while(k < (len(time)-1)):
+						if(time[k+1] == "Ultra"):
+							print(time[k], end = "  ")
+						
+						k += 1
+
+				elif(cat == 1):
+					print("\tTimes (Gold) > \n") 		
+					k = 0;
+					while(k < (len(time)-1)):
+
+						if(time[k+1] == "Gold"):
+							print(time[k], end = "  ")
+						
+						k += 1
+				elif(cat == 0):
+					print("\tTimes (Normal) > \n") 
+					k = 0;
+					while(k < (len(time)-1)):
+
+						if(time[k+1] != "Gold" and time[k+1] != "Ultra" and time[k] != "Gold" and time[k] != "Ultra"):
+							print(time[k], end = "  ")
+						
+						k += 1
+
+					if(k == len(time)-1 and time[k] != "Gold" and time[k] != "Ultra"):
+						print(time[k])
+
+				print("\n\n")
+				offset += 1
+		
+
+
 
 #######   main   #######
 
@@ -132,7 +190,8 @@ movie_ids, movie_titles, movie_actors = ([] for i in range(3))
 movie_director, movie_duration, movie_times = ([] for i in range(3))
 
 parseMovies()
-
+#category = input("Enter category of movies [0-Normal] [1-Gold] [2-Ultra] [3-All]")
+#getMoviesByCategory(category)
 # print(days)
 # print(movies_showing)
 # print(movie_ids)
