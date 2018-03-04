@@ -3,7 +3,10 @@ import urllib.request
 import re
 import json
 
-def printAllMovies(days, movies_showing, movie_ids, movie_titles, movie_director, movie_duration, movie_actors, movie_times):
+def printAllMovies():
+	global data, days, movies_showing, movie_ids, movie_titles, movie_actors
+	global movie_director, movie_duration, movie_times
+
 	offset = 0
 	for i in range(0,len(movies_showing)):
 		print(days[i] + "> \n")
@@ -50,85 +53,86 @@ def cleanData(data):
 
 	return data
 
+def parseMovies():
+
+	global data, days, movies_showing, movie_ids, movie_titles, movie_actors
+	global movie_director, movie_duration, movie_times
+
+	index = data.find("2018")
+
+	while(data.find("2018") != -1):
+
+		days.append(data[index:index+10].strip())
+
+		data = data[index+10:]
+
+		movie_count = 0					# movies showing in a particular day
+
+		offset = data.find("url")
+		while(offset != -1 and offset < data.find("2018")):
+
+			movie_ids.append(data[offset+7:data.find("\"", offset+7)].strip())
+
+			offset = data.find("title")
+			data = data[offset:]
+			movie_titles.append(data[9: data.find("\"", 9)].strip())
+
+			offset = data.find("duration")
+			data = data[offset:]
+			movie_duration.append(data[12: data.find("\"", 12)].strip())
+
+			offset = data.find("director")
+			data = data[offset:]
+			movie_director.append(data[12: data.find("\"", 12)].strip())
+
+			offset = data.find("actors")
+			data = data[offset:]
+			movie_actors.append(data[10: data.find("\"", 10)].strip())
+
+			times = []
+			offset = data.find("times")
+			data = data[offset:]
+
+			offset = data.find("time\":")
+			while(offset != -1 and offset < data.find("url")):
+
+				data = data[offset+8:]
+				times.append(data[: data.find("\"")].strip())
+				data = data[data.find("\""):]
+
+				category = data.find("shortName")
+				if(category != -1 and category < data.find("time") and category < data.find("url")):
+					times.append(data[category+12:data.find("\"", category+12)].strip())
+				offset = data.find("time")
 
 
-# main
+			movie_times.append(times)
+			movie_count += 1
+
+			offset = data.find("url")
+
+
+		movies_showing.append(movie_count)
+		index = data.find("2018")
+
+
+
+#######   main   #######
+
 src = urllib.request.urlopen('https://universalcinemas.com/').read()
 soup = bs.BeautifulSoup(src, "lxml")
 data = soup.find_all('script')
 
 data = cleanData(data)
 
-days = []
-movies_showing = []
+days = []				
+movies_showing = [] 	# to store how many movies are being shown in day
 
-movie_ids = []
-movie_titles = []
-movie_actors = []
-movie_director = []
-movie_duration = []
-movie_times = []
+movie_ids, movie_titles, movie_actors = ([] for i in range(3))	
+movie_director, movie_duration, movie_times = ([] for i in range(3))
 
+parseMovies()
 
-index = data.find("2018")
-
-while(data.find("2018") != -1):
-
-	days.append(data[index:index+10].strip())
-
-	data = data[index+10:]
-
-	movie_count = 0					# movies showing in a particular day
-
-	offset = data.find("url")
-	while(offset != -1 and offset < data.find("2018")):
-
-		movie_ids.append(data[offset+7:data.find("\"", offset+7)].strip())
-
-		offset = data.find("title")
-		data = data[offset:]
-		movie_titles.append(data[9: data.find("\"", 9)].strip())
-
-		offset = data.find("duration")
-		data = data[offset:]
-		movie_duration.append(data[12: data.find("\"", 12)].strip())
-
-		offset = data.find("director")
-		data = data[offset:]
-		movie_director.append(data[12: data.find("\"", 12)].strip())
-
-		offset = data.find("actors")
-		data = data[offset:]
-		movie_actors.append(data[10: data.find("\"", 10)].strip())
-
-		times = []
-		offset = data.find("times")
-		data = data[offset:]
-
-		offset = data.find("time\":")
-		while(offset != -1 and offset < data.find("url")):
-
-			data = data[offset+8:]
-			times.append(data[: data.find("\"")].strip())
-			data = data[data.find("\""):]
-
-			category = data.find("shortName")
-			if(category != -1 and category < data.find("time") and category < data.find("url")):
-				times.append(data[category+12:data.find("\"", category+12)].strip())
-			offset = data.find("time")
-
-
-		movie_times.append(times)
-		movie_count += 1
-
-		offset = data.find("url")
-
-
-	movies_showing.append(movie_count)
-	index = data.find("2018")
-
-
-printAllMovies(days, movies_showing, movie_ids, movie_titles, movie_director, movie_duration, movie_actors, movie_times)
 # print(days)
 # print(movies_showing)
 # print(movie_ids)

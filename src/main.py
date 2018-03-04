@@ -1,2 +1,3 @@
-import UniversalCinemas
+import UniversalCinemas as test
 
+test.printAllMovies()
